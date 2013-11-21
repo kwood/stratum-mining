@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+
+    <title>Crypto-Experts Stratum-mining by ahmedbodi</title>
+  </head>
+
+  <body>
+
+    <header>
+      <div class="container">
+        <h1>Crypto-Experts Stratum-mining</h1>
+        <h2>AIO Stratum mining server for POS, POW, sha256 and scrypt coins</h2>
+
+        <section id="downloads">
+          <a href="https://github.com/ahmedbodi/stratum-mining/zipball/master" class="btn">Download as .zip</a>
+          <a href="https://github.com/ahmedbodi/stratum-mining/tarball/master" class="btn">Download as .tar.gz</a>
+          <a href="https://github.com/ahmedbodi/stratum-mining" class="btn btn-github"><span class="icon"></span>View on GitHub</a>
+        </section>
+      </div>
+    </header>
+
+    <div class="container">
+      <section id="main_content">
+        <h1>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>Description</h1>
+
+<p>This guide will help you get stratum-mining setup including all dependencies and software required.
+Please use this as a guide on how get things to work but keep in mind that things change and maybe this Wiki page is outdated and things do not work anymore as expected.</p>
+
+<h1>
+<a name="coin-daemon" class="anchor" href="#coin-daemon"><span class="octicon octicon-link"></span></a>Coin Daemon</h1>
+
+<p>This version of stratum is designed with ease of use and cross compatability in mind. As such it currently works with SHA256 and Scrypt (Pure POW) coins. If a coin daemon hant been compiled then follow the below instructions</p>
+
+<h2>
+<a name="requirements" class="anchor" href="#requirements"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>We need to install the dependencies required:</p>
+
+<pre><code>apt-get install build-essential libboost-all-dev libcurl4-openssl-dev libdb5.1-dev libdb5.1++-dev
+</code></pre>
+
+<h2>
+<a name="download" class="anchor" href="#download"><span class="octicon octicon-link"></span></a>Download</h2>
+
+<p>Download the source code following the below example for litecoin:</p>
+
+<pre><code>cd ~
+git clone git://github.com/litecoin-project/litecoin.git
+</code></pre>
+
+<h2>
+<a name="compile" class="anchor" href="#compile"><span class="octicon octicon-link"></span></a>Compile</h2>
+
+<p>With the source downloaded and all dependencies installed we can now try to compile <code>litecoind</code>:</p>
+
+<pre><code># Change to src folder
+cd ~
+cd litecoin/src
+# Compile litecoind
+make -f makefile.unix USE_UPNP=-
+# Copy to system path
+cp litecoind /usr/bin
+</code></pre>
+
+<p>You can now run litecoind getinfo. If you see a response litecoin is now setup and working properly .</p>
+
+<h1>
+<a name="stratum-mining" class="anchor" href="#stratum-mining"><span class="octicon octicon-link"></span></a>Stratum Mining</h1>
+
+<h2>
+<a name="requirements-1" class="anchor" href="#requirements-1"><span class="octicon octicon-link"></span></a>Requirements</h2>
+
+<p>First we need to install some packages required to run <code>stratum-mining</code>:</p>
+
+<pre><code>apt-get install python-mysqldb python-dev  python-simplejson python-crypto
+easy_install -U distribute
+</code></pre>
+
+<h2>
+<a name="downloading" class="anchor" href="#downloading"><span class="octicon octicon-link"></span></a>Downloading</h2>
+
+<p>We need to fetch <code>stratum-mining</code> and some additional requirements:</p>
+
+<pre><code>git clone https://github.com/ahmedbodi/stratum-mining.git
+</code></pre>
+
+<p>That covers the download. Lets go ahead and prepare the software!</p>
+
+<h2>
+<a name="installation" class="anchor" href="#installation"><span class="octicon octicon-link"></span></a>Installation</h2>
+
+<p>If you are using stratum with a scrypt based coin we need to install 'litecoin_scrypt' 'stratum-mining-proxy and 'stratum'
+If a SHA256 Based coin is being used then just 'stratum' and 'stratum-mining-proxy' is needed:</p>
+
+<pre><code>cd stratum-mining
+git submodule init
+git submodule update
+
+cd externals/litecoin_scrypt
+python setup.py install
+
+cd externals/stratum
+python setup.py install
+
+cd externals/stratum-mining-proxy
+python setup.py install
+</code></pre>
+
+<p>This will compile and install the requirements to run <code>stratum-mining</code>.</p>
+
+<h2>
+<a name="configuration" class="anchor" href="#configuration"><span class="octicon octicon-link"></span></a>Configuration</h2>
+
+<p>Now that we have everything installed we can configure <code>stratum-mining</code>:</p>
+
+<pre><code>cd stratum-mining
+cp conf/config_sample.py conf/config.py
+nano conf/config.py
+</code></pre>
+
+<p>You will need to adjust some settings for this to work:</p>
+
+<pre><code># ******************** BASIC SETTINGS ***************
+# These are the MUST BE SET parameters!
+
+CENTRAL_WALLET = 'set_valid_addresss_in_config!'    # local coin address where money goes
+
+COINDAEMON_TRUSTED_HOST = 'localhost'
+COINDAEMON_TRUSTED_PORT = 8332
+COINDAEMON_TRUSTED_USER = 'user'
+COINDAEMON_TRUSTED_PASSWORD = 'somepassword'
+
+# The available options are scrypt and sha256d.
+COINDAEMON_ALGO = 'scrypt'
+
+#Port used for Stratum. 
+LISTEN_SOCKET_TRANSPORT = 3313
+
+# ******************** Database  *********************
+
+# MySQL
+DB_MYSQL_HOST = 'localhost'
+DB_MYSQL_DBNAME = 'pooldb'
+DB_MYSQL_USER = 'pooldb'
+DB_MYSQL_PASS = '**empty**'
+
+#This is set to 20 to match MPOS and MMCFE's difficulty of 20
+POOL_TARGET = 16            # Pool-wide difficulty target int &gt;= 1
+
+# When being used with the MPOS Frontend this helps to ensure that every block gets the correct share assigned to the block
+SOLUTION_BLOCK_HASH = True 
+
+# ******************** Getwork Proxy Settings *********************
+# This enables a copy of slush's getwork proxy for old clients
+# It will also auto-redirect new clients to the stratum interface
+# so you can point ALL clients to: http://&lt;yourserver&gt;:&lt;GW_PORT&gt;
+GW_ENABLE = True    # Enable the Proxy
+GW_PORT = 3333      # Getwork Proxy Port
+
+</code></pre>
+
+<p>You can fetch your wallet address via litecoind :</p>
+
+<pre><code>litecoind getaccountaddress ""
+</code></pre>
+
+<p>Add the settings required above and the stratum is ready to be started</p>
+
+<h2>
+<a name="starting-stratum-mining" class="anchor" href="#starting-stratum-mining"><span class="octicon octicon-link"></span></a>Starting stratum-mining</h2>
+
+<p>This is the easy part. Change to the <code>stratum-mining</code> folder and fire up the service:</p>
+
+<pre><code>twistd -ny launcher.tac
+</code></pre>
+
+<p>If you want to run it in the background you can remove the <code>-ny</code> and replace it with <code>-y</code>:</p>
+
+<pre><code>twistd -y launcher.tac
+</code></pre>
+
+<h2>
+<a name="special-notes" class="anchor" href="#special-notes"><span class="octicon octicon-link"></span></a>Special Notes</h2>
+
+<p>When running stratum-mining I noticed that stratum and pushpoold use different settings. <a href="https://github.com/pooler" class="user-mention">@pooler</a> was nice enough to explain it to me in detail:</p>
+
+<p><code>pushpoold</code> uses a target bits terminology and stratum a difficulty setting. These are different. When running <code>pushpoold</code> at a target bit of 20 you will match the default setting of 16 in <code>startum-mining</code>. This will ensure that hashrates on <code>MPOS</code> match up! If you'd think you could set <code>pushpoold</code> to 16 and match it with stratum you will be off.</p>
+
+<p>He devised a formula that can be used to change <code>startum</code> difficulty and match <code>pushpoold</code> and <code>MPOS</code> to it:</p>
+
+<p><code>(stratum diff) ~= 2^((target bits in pushpool) - 16)</code></p>
+
+<p>So if you change your stratum dWhen running stratum-mining I noticed that stratum and pushpoold use different settings. <a href="https://github.com/pooler" class="user-mention">@pooler</a> was nice enough to explain it to me in detail:</p>
+
+<p>pushpoold uses a target bits terminology and stratum a difficulty setting. These are different. When running pushpoold at a target bit of 20 you will match the default setting of 16 in startum-mining. This will ensure that hashrates on MPOS match up! If you'd think you could set pushpoold to 16 and match it with stratum you will be off.</p>
+
+<p>He devised a formula that can be used to adjust <code>stratum</code> to match the difficulty used in <code>MPOS</code> (and <code>pushpoold</code>:</p>
+
+<p>(stratum diff) ~= 2^((target bits in pushpool) - 16)</p>
+
+<p>Example, you are running <code>MPOS</code> and <code>pushpoold</code> with a setting of <code>20</code>:</p>
+
+<p><code>16 ~= 2^(20 - 16)</code></p>
+
+<p>Add the resulting <code>16</code> as the <code>POOL_TARGET</code> in the stratum configuration.</p>
+      </section>
+    </div>
+
+    
+  </body>
+</html>
