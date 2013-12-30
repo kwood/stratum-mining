@@ -44,14 +44,14 @@ def setup(on_startup):
             if isinstance(result, dict):
                 # litecoind implements version 1 of getblocktemplate
                 if result['version'] >= 1:
-		   result = (yield bitcoin_rpc.getinfo())
+                   result = (yield bitcoin_rpc.getinfo())
                    if isinstance(result,dict):
                       if 'stake' in result and settings.COINDAEMON_Reward == 'POS':
-			 log.info("CoinD looks to be a POS Coin, Config for POS looks correct")
+                         log.info("CoinD looks to be a POS Coin, Config for POS looks correct")
                          break
                       elif 'stake' not in result and settings.COINDAEMON_Reward == 'POW':
-			 log.info("CoinD looks to be a POW Coin, Config looks to be correct")
-			 break
+                         log.info("CoinD looks to be a POW Coin, Config looks to be correct")
+                         break
                       else:
                           log.error("Wrong Algo Selected, Switch to appropriate POS/POW in config.py!")
                           reactor.stop()
@@ -66,9 +66,9 @@ def setup(on_startup):
 
         except Exception, e:
             if isinstance(e[2], str):
-		try:
+                try:
                    if isinstance(json.loads(e[2])['error']['message'], str):
-	              error = json.loads(e[2])['error']['message']
+                      error = json.loads(e[2])['error']['message']
                    if error == "Method not found":
                       log.error("CoinD does not support getblocktemplate!!! (time to upgrade.)")
                       reactor.stop()
@@ -77,9 +77,9 @@ def setup(on_startup):
                        time.sleep(29)
                    else:
                        log.error("Coind Error: %s", error)
-	        except ValueError:
-		        log.error("Failed Connect(HTTP 500 or Invalid JSON), Check Username and Password!")
-		        reactor.stop()
+                except ValueError:
+                        log.error("Failed Connect(HTTP 500 or Invalid JSON), Check Username and Password!")
+                        reactor.stop()
         time.sleep(1)  # If we didn't get a result or the connect failed
         
     log.info('Connected to the coind - Begining to load Address and Module Checks!')

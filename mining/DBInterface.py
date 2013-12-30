@@ -65,7 +65,7 @@ class DBInterface():
             log.debug('DB_None INIT')
             import DB_None
             return DB_None.DB_None()
-	    
+        
 
     def clearusercache(self):
         log.debug("DBInterface.clearusercache called")
@@ -75,8 +75,8 @@ class DBInterface():
     def scheduleImport(self):
         # This schedule's the Import
         if settings.DATABASE_DRIVER == "sqlite":
-        	use_thread = False
-	else:   use_thread = True
+            use_thread = False
+    else:   use_thread = True
         
         if use_thread:
             self.queueclock = reactor.callLater(settings.DB_LOADER_CHECKTIME , self.run_import_thread)

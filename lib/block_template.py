@@ -23,7 +23,7 @@ class BlockTemplate(halfnode.CBlock):
     coinbase_transaction_class = CoinbaseTransaction
     
     def __init__(self, timestamper, coinbaser, job_id):
-   	log.debug("Got To  Block_template.py")
+           log.debug("Got To  Block_template.py")
         super(BlockTemplate, self).__init__()
         
         self.job_id = job_id 
@@ -51,11 +51,11 @@ class BlockTemplate(halfnode.CBlock):
         #txhashes = [None] + [ binascii.unhexlify(t['hash']) for t in data['transactions'] ]
         txhashes = [None] + [ util.ser_uint256(int(t['hash'], 16)) for t in data['transactions'] ]
         mt = merkletree.MerkleTree(txhashes)
-	if settings.COINDAEMON_Reward == 'POW':
+        if settings.COINDAEMON_Reward == 'POW':
            coinbase = self.coinbase_transaction_class(self.timestamper, self.coinbaser, data['coinbasevalue'], data['coinbaseaux']['flags'], data['height'], 
-			settings.COINBASE_EXTRAS)
-	else:
-	    coinbase = self.coinbase_transaction_class(self.timestamper, self.coinbaser, data['coinbasevalue'], data['coinbaseaux']['flags'], data['height'],
+                        settings.COINBASE_EXTRAS)
+        else:
+            coinbase = self.coinbase_transaction_class(self.timestamper, self.coinbaser, data['coinbasevalue'], data['coinbaseaux']['flags'], data['height'],
                         settings.COINBASE_EXTRAS, data['curtime'])
 
         self.height = data['height']
